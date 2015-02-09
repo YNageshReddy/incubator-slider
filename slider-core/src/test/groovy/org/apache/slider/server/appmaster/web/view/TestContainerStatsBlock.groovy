@@ -43,7 +43,7 @@ import org.junit.Before
 import org.junit.Test
 
 @Slf4j
-@CompileStatic
+//@CompileStatic
 public class TestContainerStatsBlock extends BaseMockAppStateTest {
 
   private ContainerStatsBlock statsBlock;
@@ -53,6 +53,7 @@ public class TestContainerStatsBlock extends BaseMockAppStateTest {
 
   @Before
   public void setup() {
+    super.setup()
     SliderClusterProtocol clusterProto = new MockSliderClusterProtocol();
     ProviderService providerService = new MockProviderService();
     ProviderAppState providerAppState = new ProviderAppState(
@@ -66,13 +67,7 @@ public class TestContainerStatsBlock extends BaseMockAppStateTest {
         null,
         null, metrics, null);
 
-    Injector injector = Guice.createInjector(new AbstractModule() {
-          @Override
-          protected void configure() {
-            bind(WebAppApi.class).toInstance(inst);
-          }
-        });
-
+    Injector injector = Guice.createInjector(new WebappModule(inst))
     statsBlock = injector.getInstance(ContainerStatsBlock.class);
 
     cont1 = new MockContainer();
@@ -89,6 +84,21 @@ public class TestContainerStatsBlock extends BaseMockAppStateTest {
     cont2.resource = new MockResource();
   }
 
+  
+  public static class WebappModule extends AbstractModule {
+    final WebAppApiImpl instance;
+
+    WebappModule(WebAppApiImpl instance) {
+      this.instance = instance
+    }
+
+    @Override
+    protected void configure() {
+      bind(WebAppApi.class).toInstance(instance);
+    }
+  }
+  
+  
   public MockContainerId mockContainerId(int count) {
     new MockContainerId(applicationAttemptId, count)
   }
